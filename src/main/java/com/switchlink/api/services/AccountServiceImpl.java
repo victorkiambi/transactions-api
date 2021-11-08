@@ -32,9 +32,8 @@ public class AccountServiceImpl implements AccountService{
             return null;
         }else
         {
-            List<Account> account = accountRepository.findByCustomer_CustomerId(customerId);
 
-            return account;
+            return accountRepository.findByCustomer_CustomerId(customerId);
         }
 
 //        return accountRepository.findByCustomer(1L);

@@ -36,30 +36,20 @@ public class Account {
     @ToString.Exclude
     private Customer customer;
 
-    @Override
-    public String toString() {
-        return "Account{" +
-                "accNo=" + accNo +
-                ", transactionType=" + transactionType +
-                ", minBalance=" + minBalance +
-                ", customer=" + customer +
-                '}';
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    @ToString.Exclude
+    private List<Transaction> transactions = new ArrayList<>();
+
+
+    public void addTransaction(Transaction transaction){
+        transactions.add(transaction);
+        transaction.setAccount(this);
     }
 
-    //    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
-//    @JsonIgnore
-//    private List<Transaction> transactions = new ArrayList<>();
-
-
-
-//    public void addTransaction(Transaction transaction){
-//        transactions.add(transaction);
-//        transaction.setAccount(this);
-//    }
-//
-//    public void removeTransaction(Transaction transaction){
-//        transactions.remove(transaction);
-//        transaction.setAccount(null);
-//    }
+    public void removeTransaction(Transaction transaction){
+        transactions.remove(transaction);
+        transaction.setAccount(null);
+    }
 
 }
