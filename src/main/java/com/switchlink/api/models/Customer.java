@@ -4,6 +4,7 @@ import com.sun.istack.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -27,18 +28,13 @@ public class Customer {
     @NotNull
     private Integer customerPhone;
 
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.MERGE)
+    @NotNull
+    @Transient
+    private Double minDeposit;
+
+    @OneToMany(mappedBy = "customer",  cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
     private List<Account> accounts = new ArrayList<>();
-
-    public Customer(Long customerId, String customerName, String customerEmail, Integer customerPhone) {
-        this.customerId = customerId;
-        this.customerName = customerName;
-        this.customerEmail = customerEmail;
-        this.customerPhone = customerPhone;
-    }
-
-    public Customer(long l) {
-    }
 
     public void addAccount(Account account) {
         accounts.add(account);
@@ -49,4 +45,6 @@ public class Customer {
         accounts.remove(account);
         account.setCustomer(null);
     }
+
+
 }

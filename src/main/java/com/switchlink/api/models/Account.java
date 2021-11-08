@@ -6,6 +6,7 @@ import com.sun.istack.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -23,11 +24,7 @@ public class Account {
     @NotNull
     private Long accNo;
 
-    @NotNull
-    private String accName;
-
-    @NotNull
-    private String accBranch;
+    private TransactionType transactionType;
 
     @NotNull
     private double minBalance;
@@ -36,22 +33,33 @@ public class Account {
     @ManyToOne( fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @ToString.Exclude
     private Customer customer;
 
-    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    private List<Transaction> transactions = new ArrayList<>();
-
-
-
-    public void addTransaction(Transaction transaction){
-        transactions.add(transaction);
-        transaction.setAccount(this);
+    @Override
+    public String toString() {
+        return "Account{" +
+                "accNo=" + accNo +
+                ", transactionType=" + transactionType +
+                ", minBalance=" + minBalance +
+                ", customer=" + customer +
+                '}';
     }
 
-    public void removeTransaction(Transaction transaction){
-        transactions.remove(transaction);
-        transaction.setAccount(null);
-    }
+    //    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+//    @JsonIgnore
+//    private List<Transaction> transactions = new ArrayList<>();
+
+
+
+//    public void addTransaction(Transaction transaction){
+//        transactions.add(transaction);
+//        transaction.setAccount(this);
+//    }
+//
+//    public void removeTransaction(Transaction transaction){
+//        transactions.remove(transaction);
+//        transaction.setAccount(null);
+//    }
 
 }
