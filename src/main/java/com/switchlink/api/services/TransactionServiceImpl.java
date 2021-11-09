@@ -1,14 +1,19 @@
 package com.switchlink.api.services;
 
+import com.switchlink.api.dto.TransactionDTO;
 import com.switchlink.api.models.Account;
 import com.switchlink.api.models.Transaction;
 import com.switchlink.api.models.TransactionType;
 import com.switchlink.api.repositories.AccountRepository;
 import com.switchlink.api.repositories.TransactionRepository;
+import com.switchlink.api.response.ResponseHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TransactionServiceImpl implements TransactionService{
@@ -20,12 +25,26 @@ public class TransactionServiceImpl implements TransactionService{
     public AccountRepository accountRepository;
 
     @Override
-    public Account depositToOwnAccount(Transaction newTransaction) {
+    public ResponseEntity<Object> getTransactionsByAccount(Long accNo) {
+        Account account = getActualBalance(accNo);
+
+        if (account == null){
+            return ResponseHandler.generateResponse("No account found for the account number",HttpStatus.NOT_FOUND, null);
+        }
+        else {
+            List<TransactionDTO> transaction = transactionRepository.findTransactionByAccount_AccNo(accNo)
+                    .stream().map(this::convertToTransactionDTO).collect(Collectors.toList());
+            return ResponseHandler.generateResponse("Success", HttpStatus.OK, transaction);
+        }
+    }
+
+    @Override
+    public ResponseEntity<Object> depositToOwnAccount(Transaction newTransaction) {
         Account accounts = getActualBalance(newTransaction.getSenderAccNo());
 
         //check if account exists
         if (accounts == null){
-            return null;
+            return ResponseHandler.generateResponse("No account found for the account number",HttpStatus.NOT_FOUND, null);
         }
         else{
             //add new amount to minimum balance
@@ -38,36 +57,26 @@ public class TransactionServiceImpl implements TransactionService{
             transaction1.setTransactionType(TransactionType.DEPOSIT);
             transaction1.setTransactionAmount(depositedAmount);
 
-            return setBalance(account, newBalance, transaction1);
-        }
-    }
-
-
-    @Override
-    public List<Transaction> getTransactionsByAccount(Long accNo) {
-        Account account = getActualBalance(accNo);
-
-        if (account == null){
-            return null;
-        }
-        else {
-            return transactionRepository.findTransactionByAccount_AccNo(accNo);
+            return ResponseHandler.generateResponse("Success", HttpStatus.OK, setBalance(account, newBalance, transaction1));
         }
     }
 
     @Override
-    public Account accountToAccountTransfer(Transaction newTransaction) {
+    public ResponseEntity<Object> accountToAccountTransfer(Transaction newTransaction) {
         Account senderAccount = getActualBalance(newTransaction.getSenderAccNo());
         Account receiverAccount = getActualBalance(newTransaction.getReceiverAccNo());
 
         //check if both sender and receiver accounts exist
         if ((senderAccount == null) || (receiverAccount == null)) {
-            return null;
+            return ResponseHandler.generateResponse("No account found for the account number",HttpStatus.NOT_FOUND, null);
         }
+
         //check if sender account is 0 or less than amount to be withdrawn
         if ((senderAccount.getMinBalance() == 0) || (senderAccount.getMinBalance() < newTransaction.getTransactionAmount())) {
-            return null;
+            return ResponseHandler.generateResponse("Insufficient funds ",HttpStatus.NOT_FOUND, null);
+
         } else {
+
             //subtract amount from sender
             double senderMinBalance = senderAccount.getMinBalance();
             double depositedAmount = newTransaction.getTransactionAmount();
@@ -78,7 +87,6 @@ public class TransactionServiceImpl implements TransactionService{
             senderTransaction.setTransactionType(TransactionType.TRANSFER_OUT);
             senderTransaction.setTransactionAmount(newTransaction.getTransactionAmount());
             senderTransaction.setReceiverAccNo(newTransaction.getReceiverAccNo());
-
 
             //update new balance
             Account senAccount = setBalance(account, newSenderBalance, senderTransaction);
@@ -95,17 +103,18 @@ public class TransactionServiceImpl implements TransactionService{
             //update receiver balance
             setBalance(account1, newReceiverBalance, receiverTransaction);
 
-            return senAccount;
+            return ResponseHandler.generateResponse("Success",HttpStatus.OK, senAccount);
         }
     }
 
     @Override
-    public Account accountWithdrawal(Transaction newTransaction) {
+    public ResponseEntity<Object> accountWithdrawal(Transaction newTransaction) {
         Account accounts = getActualBalance(newTransaction.getSenderAccNo());
 
         //check if account exists
         if (accounts == null) {
-            return null;
+            return ResponseHandler.generateResponse("No account found for the account number",HttpStatus.NOT_FOUND, null);
+
         } else {
 
             double minBalance = accounts.getMinBalance();
@@ -117,7 +126,7 @@ public class TransactionServiceImpl implements TransactionService{
             transaction1.setTransactionType(TransactionType.WITHDRAWAL);
             transaction1.setTransactionAmount(withdrawalAmount);
 
-            return setBalance(account, newBalance, transaction1);
+            return ResponseHandler.generateResponse("Success",HttpStatus.OK, setBalance(account, newBalance, transaction1));
         }
     }
 
@@ -136,4 +145,11 @@ public class TransactionServiceImpl implements TransactionService{
         return accountRepository.findAccountByAccNo(accNo);
     }
 
+    private TransactionDTO convertToTransactionDTO(Transaction transaction) {
+        TransactionDTO transactionDTO = new TransactionDTO();
+        transactionDTO.setTransactionReferenceNo(transaction.getTransactionReferenceNo());
+        transactionDTO.setTransactionType(transaction.getTransactionType());
+        transactionDTO.setTransactionAmount(transaction.getTransactionAmount());
+        return transactionDTO;
+    }
 }

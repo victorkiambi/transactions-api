@@ -1,12 +1,10 @@
 package com.switchlink.api.services;
 
-import com.switchlink.api.models.Account;
 import com.switchlink.api.models.Customer;
-
-import java.util.List;
+import org.springframework.http.ResponseEntity;
 
 public interface CustomerService {
-    Customer save(Customer newCustomer);
+    ResponseEntity<Object> save(Customer newCustomer);
 
-    Customer getCustomer(Long customerId);
+    ResponseEntity<Object> getCustomer(Long customerId);
 }

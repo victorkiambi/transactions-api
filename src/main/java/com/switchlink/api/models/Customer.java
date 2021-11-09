@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import javax.persistence.*;
+import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,13 +21,17 @@ public class Customer {
     private Long customerId;
 
     @NotNull
-    private String customerName;
+    private String username;
 
     @NotNull
-    private String customerEmail;
+    @Size(max = 120)
+    private String password;
 
     @NotNull
-    private Integer customerPhone;
+    private String email;
+
+    @NotNull
+    private Integer phone;
 
     @NotNull
     @Transient
@@ -35,6 +40,10 @@ public class Customer {
     @OneToMany(mappedBy = "customer",  cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private List<Account> accounts = new ArrayList<>();
+
+    public Customer(String username, String customerEmail, Integer customerPhone, String encode) {
+    }
+
 
     public void addAccount(Account account) {
         accounts.add(account);

@@ -1,16 +1,14 @@
 package com.switchlink.api.services;
 
-import com.switchlink.api.models.Account;
 import com.switchlink.api.models.Transaction;
-
-import java.util.List;
+import org.springframework.http.ResponseEntity;
 
 public interface TransactionService {
-    Account depositToOwnAccount(Transaction newTransaction);
+    ResponseEntity<Object> depositToOwnAccount(Transaction newTransaction);
 
-    List<Transaction> getTransactionsByAccount(Long accNo);
+    ResponseEntity<Object> getTransactionsByAccount(Long accNo);
 
-    Account accountToAccountTransfer(Transaction newTransaction);
+    ResponseEntity<Object> accountToAccountTransfer(Transaction newTransaction);
 
-    Account accountWithdrawal(Transaction newTransaction);
+    ResponseEntity<Object> accountWithdrawal(Transaction newTransaction);
 }

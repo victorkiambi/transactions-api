@@ -20,7 +20,6 @@ public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "account_generator")
     @SequenceGenerator(name="account_generator", sequenceName = "account_seq", initialValue = 1000, allocationSize=20)
-
     @NotNull
     private Long accNo;
 

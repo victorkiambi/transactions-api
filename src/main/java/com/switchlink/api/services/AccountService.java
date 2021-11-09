@@ -1,10 +1,8 @@
 package com.switchlink.api.services;
 
 
-import com.switchlink.api.models.Account;
-
-import java.util.List;
+import org.springframework.http.ResponseEntity;
 
 public interface AccountService {
-    List<Account> getAccount(Long customerId);
+    ResponseEntity<Object> getAccount(Long customerId);
 }
